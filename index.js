@@ -61,10 +61,15 @@ io.on('connection', (socket) => {
             const room = await Room.destroy({where:{roomId: data.room}})
             console.log("Game finished",data)
         })
+        socket.on('leave_room', (data) => {
+            socket.leave(data.room)
+            socket.to(data.room).emit('user_left')
+        })
     })
 
     socket.on("create_user_room", async (data) => {
-        await createUserRoom(data.user, data.room, data.isX)
+        console.log("FFFFFFFf", data)
+        await createUserRoom(data.user, data.room, true)
         console.log("Create user room", data)
     })
 
@@ -129,11 +134,6 @@ io.on('connection', (socket) => {
             const room = await Room.destroy({where:{roomId: data.room}})
             console.log("Game finished",data)
         })
-    })
-
-    socket.on('leave_room', (data) => {
-        socket.leave(data.room)
-        socket.to(data.room).emit('user_left')
     })
 })
 

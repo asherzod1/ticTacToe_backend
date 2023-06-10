@@ -31,9 +31,28 @@ const createRoom = async () =>{
     return new_room.roomId
 }
 
+const createRoomObj = async () =>{
+    const randomIndex = Math.floor(Math.random() * 100000);
+    console.log("LOADED")
+    const room = await Room.findOne({ where: { roomId: randomIndex } });
+    if(room){
+        return createRoom()
+    }
+    const new_room = await Room.create({
+        roomId: randomIndex,
+        // createdAt: new Date(),
+        // updatedAt: new Date(),
+        xIsNext: true,
+        values: JSON.stringify(Array(9).fill(null))
+    })
+    return new_room
+}
+
 const createUserRoom = async (userId, roomId, isX) =>{
-    const room = await Room.findOne({ where: { roomId: parseInt(roomId) } });
-    // console.log("Created room", room)
+    let room = await Room.findOne({ where: { roomId: parseInt(roomId) } });
+    console.log("Created room", room)
+    console.log("ROOM ID", roomId)
+    console.log("ROOM OBJECT", room)
     const userRoom = await UserRoom.findOne({ where: { userId, roomId:room.id } });
     console.log("Created user room", userRoom)
     if(await userRoom){
