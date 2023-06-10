@@ -13,7 +13,10 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:3000", "https://tic-tac-toe-frontend-ten.vercel.app"],
+        origin: ["http://localhost:3000",
+            "https://tic-tac-toe-frontend-ten.vercel.app",
+            "https://tic-tac-toe-frontend-11crz7ovq-asherzod1.vercel.app"
+        ],
         methods: ["GET", "POST"]
     }
 })
