@@ -6,6 +6,7 @@ const { Server } = require('socket.io')
 const cors = require('cors')
 const {getRandomSymbol, createUser, createRoom, createUserRoom, createOrUpdateRoom} = require("./utilits");
 const {Room, UserRoom, User} = require("./models/model");
+const {Sequelize} = require("sequelize");
 
 app.use(cors())
 
@@ -15,7 +16,7 @@ const io = new Server(server, {
     cors: {
         origin: ["http://localhost:3000",
             "https://tic-tac-toe-frontend-ten.vercel.app",
-            "https://tic-tac-toe-frontend-kaz8nxg5g-asherzod1.vercel.app"
+            "https://tic-tac-toe-frontend-4z2364r5o-asherzod1.vercel.app"
         ],
         methods: ["GET", "POST"]
     }
@@ -88,18 +89,61 @@ io.on('connection', (socket) => {
     });
 
     socket.on("get_users_room", async (data) => {
-        console.log("Get users room", data)
+        console.log("Get users room QQQ", data)
         const userRooms = await UserRoom.findAll({where: {userId: data.user}})
         if(userRooms?.length > 0){
             const rooms = await Room.findAll({where: {id: userRooms.map((userRoom) => userRoom.roomId)}})
             const uniqueRooms = rooms.filter((value, index, self) => {
                 return self.indexOf(value) === index;
             });
-            console.log("Get users rooms Array", uniqueRooms)
-            socket.emit("get_users_room", uniqueRooms)
+            const resultData = []
+            for (let i = 0; i < uniqueRooms.length; i++) {
+                const usersRoom = await UserRoom.findAll({
+                    where: {
+                        userId: {
+                            [Sequelize.Op.not]: data.user
+                        },
+                        roomId: uniqueRooms[i].id
+                    }
+                });
+                console.log("Users room", usersRoom)
+                if(usersRoom.length > 0){
+                    const opponentUser = await User.findByPk(usersRoom[0].userId)
+                    resultData.push({
+                        ...uniqueRooms[i].dataValues,
+                        opponentUser: opponentUser.dataValues
+                    })
+                }
+            }
+            console.log("Result data", resultData)
+
+            // const resultData = uniqueRooms.map(async (room) => {
+            //     console.log("Room", room)
+            //     const usersRoom2 = await UserRoom.findAll({
+            //         where: {
+            //             userId: {
+            //                 [Sequelize.Op.not]: data.user
+            //             },
+            //             roomId: room.id
+            //         }
+            //     });
+            //     console.log("Users room 2", usersRoom2)
+            //     if(usersRoom2){
+            //         const opponentUser = await User.findByPk(usersRoom2[0].userId)
+            //         console.log("Opponent user", opponentUser)
+            //         return {
+            //             ...room,
+            //             opponentUser
+            //         }
+            //     }
+            //     return room
+            // })
+            // console.log("Result DATA", resultData)
+            // console.log("Get users rooms Array", uniqueRooms)
+            socket.emit("get_users_room", resultData)
             return;
         }
-        console.log("Get users room", userRooms)
+        // console.log("Get users room", userRooms)
         socket.emit("get_users_room", {users: userRooms})
     })
 

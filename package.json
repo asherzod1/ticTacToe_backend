@@ -4,9 +4,6 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "migrationCancel": "npx sequelize-cli db:migrate:undo",
-    "migration": "npx sequelize-cli db:migrate --env production",
-    "prestart": "npm-run-all migrationCancel migration",
     "start": "nodemon index.js"
   },
   "dependencies": {
